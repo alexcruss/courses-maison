@@ -1,0 +1,65 @@
+rules_version = '2';
+
+// Règles de sécurité Firestore d'ASSIMETO (phase 2 : foyer partagé).
+// À coller dans la console Firebase : Firestore Database > Règles > Publier.
+//
+// - Chaque téléphone se connecte de façon anonyme (aucun mot de passe).
+// - On devient membre d'un foyer en le créant ou en connaissant son code d'invitation.
+// - Seuls les membres lisent et modifient les données du foyer.
+// - Une modification n'est acceptée que si elle est plus récente que celle déjà
+//   enregistrée : un téléphone resté hors ligne ne peut pas écraser un changement plus récent.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function connecte() {
+      return request.auth != null;
+    }
+    function foyer(foyerId) {
+      return get(/databases/$(database)/documents/foyers/$(foyerId)).data;
+    }
+    function membre(foyerId) {
+      return connecte()
+        && exists(/databases/$(database)/documents/foyers/$(foyerId)/membres/$(request.auth.uid));
+    }
+    function partage(collection) {
+      return collection in ['liste', 'stock', 'recettes', 'aliments'];
+    }
+
+    // Code d'invitation vers l'identifiant du foyer : lecture d'un code précis, jamais de liste.
+    match /codes/{code} {
+      allow get: if connecte();
+      allow create: if connecte()
+        && request.resource.data.keys().hasOnly(['foyerId'])
+        && foyer(request.resource.data.foyerId).creePar == request.auth.uid;
+    }
+
+    match /foyers/{foyerId} {
+      allow create: if connecte()
+        && request.resource.data.creePar == request.auth.uid
+        && request.resource.data.code is string;
+      allow read: if membre(foyerId);
+      allow update: if membre(foyerId)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.creePar == resource.data.creePar;
+
+      match /membres/{uid} {
+        allow read: if membre(foyerId);
+        allow create: if connecte() && uid == request.auth.uid
+          && (foyer(foyerId).creePar == uid || request.resource.data.code == foyer(foyerId).code);
+        allow update: if connecte() && uid == request.auth.uid
+          && request.resource.data.code == resource.data.code;
+        allow delete: if connecte() && uid == request.auth.uid;
+      }
+
+      match /{collection}/{docId} {
+        allow read: if partage(collection) && membre(foyerId);
+        allow create: if partage(collection) && membre(foyerId)
+          && request.resource.data.majLe is string;
+        allow update: if partage(collection) && membre(foyerId)
+          && request.resource.data.majLe is string
+          && request.resource.data.majLe > resource.data.majLe;
+        allow delete: if partage(collection) && membre(foyerId);
+      }
+    }
+  }
+}

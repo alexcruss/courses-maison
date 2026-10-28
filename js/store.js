@@ -1,24 +1,27 @@
 // Données du foyer, enregistrées sur ce téléphone (localStorage).
-// Chaque enregistrement porte id, majLe, majPar et supprime : ces champs
-// serviront à la synchronisation avec Firebase en phase 2.
+// Chaque enregistrement porte id, majLe, majPar et supprime : la synchronisation
+// (sync.js) s'en sert pour garder la version la plus récente sur tous les téléphones.
 
 import { uid, maintenant, parNom } from './util.js';
 import { ALIMENTS } from './data/aliments.js';
 import { RECETTES } from './data/recettes.js';
 
 const CLE = 'assimeto:v1';
-const COLLECTIONS = ['liste', 'stock', 'recettes', 'aliments'];
-const OUBLI_SUPPRESSIONS = 60 * 86400000; // on oublie les suppressions après 60 jours
+export const COLLECTIONS = ['liste', 'stock', 'recettes', 'aliments'];
+export const OUBLI_SUPPRESSIONS = 60 * 86400000; // on oublie les suppressions après 60 jours
 
+// foyer : { id, nom, code } quand ce téléphone partage ses données avec un foyer.
 const vide = () => ({
   version: 1,
   reglages: { prenom: '', bienvenueVue: false },
+  foyer: null,
   liste: {}, stock: {}, recettes: {}, aliments: {},
 });
 
 let etat = charger();
 let enLot = 0;
 const abonnes = new Set();
+const ecritures = new Set();
 
 function charger() {
   try {
@@ -75,22 +78,70 @@ export const lire = (c, id) => {
   return r && !r.supprime ? r : null;
 };
 
+// Date de modification toujours postérieure à la version connue, même si l'horloge
+// d'un autre téléphone avance un peu : sinon le foyer refuserait la modification.
+function horodatage(c, id) {
+  const precedente = etat[c][id]?.majLe;
+  const t = maintenant();
+  return precedente && precedente >= t ? new Date(Date.parse(precedente) + 1).toISOString() : t;
+}
+
 export function ecrire(c, rec) {
-  const r = { ...rec, id: rec.id || uid(), majLe: maintenant(), majPar: etat.reglages.prenom || null, supprime: false };
+  const id = rec.id || uid();
+  const r = { ...rec, id, majLe: horodatage(c, id), majPar: etat.reglages.prenom || null, supprime: false };
   etat[c][r.id] = r;
   enregistrer();
+  ecritures.forEach((f) => f(c, r));
   return r;
 }
 
 export function supprimer(c, id) {
   if (!etat[c][id]) return;
-  etat[c][id] = { id, supprime: true, majLe: maintenant(), majPar: etat.reglages.prenom || null };
+  const r = { id, supprime: true, majLe: horodatage(c, id), majPar: etat.reglages.prenom || null };
+  etat[c][id] = r;
   enregistrer();
+  ecritures.forEach((f) => f(c, r));
 }
 
 export const reglages = () => etat.reglages;
 export function majReglages(patch) {
   etat.reglages = { ...etat.reglages, ...patch };
+  enregistrer();
+}
+
+// ——— Pour la synchronisation ———
+
+// Prévient sync.js de chaque modification faite sur ce téléphone.
+export const surEcriture = (f) => {
+  ecritures.add(f);
+  return () => ecritures.delete(f);
+};
+
+// Tous les enregistrements, suppressions comprises.
+export const fiches = (c) => Object.values(etat[c]);
+
+// Applique les versions reçues des autres téléphones quand elles sont plus récentes.
+export function appliquerDistants(c, recs) {
+  let n = 0;
+  for (const rec of recs) {
+    const local = etat[c][rec.id];
+    if (!rec.id || !rec.majLe || (local && local.majLe >= rec.majLe)) continue;
+    etat[c][rec.id] = rec;
+    n++;
+  }
+  if (n) enregistrer();
+  return n;
+}
+
+export const foyer = () => etat.foyer;
+export function majFoyer(f) {
+  etat.foyer = f;
+  enregistrer();
+}
+
+// En rejoignant un foyer sans garder ses données : on repart d'un téléphone vide.
+export function viderDonnees() {
+  etat = { ...vide(), reglages: etat.reglages, foyer: etat.foyer };
   enregistrer();
 }
 
@@ -152,13 +203,13 @@ export function importer(texte) {
   }
   delete d.app;
   delete d.exporteLe;
-  etat = nettoyer(d);
+  // Le foyer reste celui de ce téléphone, quel que soit celui de la sauvegarde.
+  etat = nettoyer({ ...d, foyer: etat.foyer });
   enregistrer();
 }
 
 export function toutEffacer() {
-  etat = { ...vide(), reglages: etat.reglages };
-  enregistrer();
+  viderDonnees();
 }
 
 export const compter = () => Object.fromEntries(COLLECTIONS.map((c) => [c, tous(c).length]));

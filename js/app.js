@@ -1,6 +1,7 @@
 // Démarrage : navigation entre les onglets, écran d'accueil, mode hors ligne.
 
 import { abonner, reglages, majReglages } from './store.js';
+import { demarrer as demarrerSync } from './sync.js';
 import { esc } from './util.js';
 import * as courses from './vues/courses.js';
 import * as maison from './vues/maison.js';
@@ -14,6 +15,7 @@ let courante = null;
 
 function afficher() {
   const nom = location.hash.replace('#', '') || 'courses';
+  courante?.demonter?.();
   courante = VUES[nom] || courses;
   const el = document.createElement('div');
   el.className = `vue vue-${nom}`;
@@ -64,6 +66,7 @@ window.addEventListener('hashchange', afficher);
 abonner(() => courante?.maj());
 afficher();
 bienvenue();
+demarrerSync();
 
 // Sur le PC (localhost), pas de cache hors ligne pour voir chaque modification,
 // sauf avec ?sw dans l'adresse pour tester le mode hors ligne.

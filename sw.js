@@ -2,7 +2,12 @@
 // VERSION change à chaque publication (tools/publier.ps1) : les téléphones
 // téléchargent alors la nouvelle version à la prochaine ouverture.
 
-const VERSION = 'assimeto-20261028-1';
+const VERSION = 'assimeto-20261028-2';
+
+// Le SDK Firebase (foyer partagé) est gardé à part : il ne change pas à chaque
+// version de l'appli et doit rester disponible hors ligne.
+const SDK = 'https://www.gstatic.com/firebasejs/12.6.0/';
+const CACHE_SDK = 'firebase-sdk-12.6.0';
 
 const FICHIERS = [
   './',
@@ -14,6 +19,8 @@ const FICHIERS = [
   './js/store.js',
   './js/metier.js',
   './js/ui.js',
+  './js/sync.js',
+  './js/firebase-config.js',
   './js/data/referentiel.js',
   './js/data/aliments.js',
   './js/data/recettes.js',
@@ -38,14 +45,25 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((cles) => Promise.all(cles.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then((cles) => Promise.all(cles.filter((k) => k !== VERSION && k !== CACHE_SDK).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  if (req.method !== 'GET') return;
+
+  if (req.url.startsWith(SDK)) {
+    e.respondWith(caches.open(CACHE_SDK).then((cache) => cache.match(req).then((enCache) => enCache
+      || fetch(req).then((rep) => {
+        if (rep.ok) cache.put(req, rep.clone());
+        return rep;
+      }))));
+    return;
+  }
+
+  if (new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then((enCache) => enCache || fetch(req).catch(() => (
       req.mode === 'navigate' ? caches.match('./index.html') : Response.error()

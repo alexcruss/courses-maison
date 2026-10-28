@@ -715,6 +715,33 @@ input[type="checkbox"] { display: inline-block; width: 22px; height: 22px; margi
 .rangement li:last-child { border-bottom: 0; }
 .rangement small { display: block; margin-top: 2px; color: var(--texte-2); line-height: 1.4; }
 
+/* ——— Foyer partagé (Réglages) ——— */
+
+.foyer-nom { margin: 0 0 4px; font-size: 20px; font-weight: 750; color: var(--titre); }
+.sync { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 14px; font-weight: 600; }
+.sync-point { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.sync-ok { color: var(--accent); }
+.sync-ok .sync-point { background: var(--accent); }
+.sync-attente { color: var(--chaud); }
+.sync-attente .sync-point { background: var(--orange); }
+.sync-erreur { color: var(--rouge); }
+.sync-erreur .sync-point { background: var(--rouge); }
+.code-foyer {
+  margin: 0 0 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--titre);
+}
+.champ-code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 22px; letter-spacing: 0.12em; text-transform: uppercase; }
+.membres-titre { margin-top: 16px; }
+.membres { margin: 0 0 6px; padding: 0; list-style: none; }
+.membres li { padding: 8px 0; border-bottom: 1px solid var(--bordure); font-weight: 600; }
+.membres li:last-child { border-bottom: 0; }
+.membres small { font-weight: 500; color: var(--texte-2); }
+.btn:disabled { opacity: 0.6; }
+
 /* ——— États vides ——— */
 
 .vide { padding: 36px 20px; text-align: center; color: var(--texte-2); }

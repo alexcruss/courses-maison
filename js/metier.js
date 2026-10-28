@@ -1,6 +1,6 @@
 // Règles métier : liste de courses, fin des courses, stock et plats réalisables.
 
-import { tous, lire, ecrire, supprimer, lot, aliment, majAliment, recettes, catalogue } from './store.js';
+import { tous, lire, ecrire, supprimer, lot, aliment, majAliment, recettes, catalogue, reglages } from './store.js';
 import { LIEUX } from './data/referentiel.js';
 import { maintenant, norm, fcfa, qteUnite } from './util.js';
 
@@ -35,7 +35,7 @@ export function ajouterALaListe(alimentId, quantite, unite) {
   }
   ecrire('liste', {
     alimentId, quantite: quantite || 1, unite: u, lieu: al?.lieu || 'marche',
-    achete: false, prixPaye: null, ajouteLe: maintenant(),
+    achete: false, prixPaye: null, ajouteLe: maintenant(), ajoutePar: reglages().prenom || null,
   });
   return 'ajout';
 }

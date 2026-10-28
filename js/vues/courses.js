@@ -1,6 +1,6 @@
 // Écran Courses : liste groupée par lieu d'achat, prix en FCFA, fin des courses.
 
-import { tous, lire, ecrire, supprimer, lot, aliment, majAliment } from '../store.js';
+import { tous, lire, ecrire, supprimer, lot, aliment, majAliment, foyer, reglages } from '../store.js';
 import { LIEUX, UNITES, EMPLACEMENTS } from '../data/referentiel.js';
 import { totaux, montant, nomDe, ajouterALaListe, terminerCourses, texteListe } from '../metier.js';
 import { entete, champAliment, feuille, toast, conseilCourt, options, ICONES } from '../ui.js';
@@ -64,13 +64,15 @@ function ligne(i) {
   const al = aliment(i.alimentId);
   const prix = montant(i);
   const conseil = conseilCourt(al);
+  // Dans un foyer partagé : qui a demandé cet article.
+  const par = foyer() && i.ajoutePar && i.ajoutePar !== reglages().prenom ? ` · ${i.ajoutePar}` : '';
   return `
     <div class="ligne${i.achete ? ' fait' : ''}">
       <button class="coche" data-action="cocher" data-id="${i.id}" aria-pressed="${i.achete}"
         aria-label="${i.achete ? 'Décocher' : 'Cocher'} ${esc(nomDe(i))}"></button>
       <button class="ligne-corps" data-action="editer" data-id="${i.id}">
         <span class="ligne-nom">${esc(nomDe(i))}</span>
-        <span class="ligne-detail">${esc(qteUnite(i.quantite, i.unite))}${conseil ? ` · ${esc(conseil)}` : ''}</span>
+        <span class="ligne-detail">${esc(qteUnite(i.quantite, i.unite))}${conseil ? ` · ${esc(conseil)}` : ''}${esc(par)}</span>
       </button>
       <span class="ligne-prix${prix ? '' : ' muet'}">${prix ? fcfa(prix) : '— F'}</span>
     </div>`;
