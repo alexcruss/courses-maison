@@ -1,13 +1,16 @@
 // Écran Plats : ce qu'on peut cuisiner avec le stock, fiches recettes, recettes perso.
 
-import { recette, ecrire, aliment, estRecetteDeBase, reglages } from '../store.js';
+import { recette, ecrire, aliment, estRecetteDeBase, reglages, foyer } from '../store.js';
 import { TYPES_RECETTE, TYPE } from '../data/referentiel.js';
 import {
   suggestions, analyser, analyseStock, ingredientDispo, ingredientsEnStock,
   ajouterManquants, marquerEpuises,
 } from '../metier.js';
 import { feuille, toast, champAliment, assiette, options, salutation, ICONES } from '../ui.js';
-import { iaDisponible, demanderIdees, rattacherIngredients, garderRecette } from '../ia.js';
+import {
+  iaDisponible, demanderIdees, rattacherIngredients, garderRecette, etatAbonnement, etatConnu, resumeAbonnement,
+} from '../ia.js';
+import { ouvrirAbonnement } from '../abonnement.js';
 import { esc, norm, qte, nombre } from '../util.js';
 
 let racine;
@@ -36,6 +39,10 @@ export function monter(el) {
     </div>`;
   el.querySelector('.recherche input').addEventListener('input', (e) => { recherche = e.target.value; maj(); });
   el.addEventListener('click', clic);
+  // L'état de l'abonnement n'est demandé qu'une fois par ouverture de l'appli.
+  if (iaDisponible() && foyer() && navigator.onLine && !etatConnu()) {
+    etatAbonnement().then(() => { if (racine === el) maj(); }).catch(() => {});
+  }
 }
 
 const correspond = (a) => {
@@ -60,7 +67,7 @@ export function maj() {
     ${iaDisponible() && !s.stockVide ? `
       <button class="carte-ia" data-action="ia">
         <span class="carte-ia-icone" aria-hidden="true">✨</span>
-        <span><strong>Idées de l'IA</strong><small>Trois plats imaginés avec ce qu'il y a à la maison</small></span>
+        <span><strong>Idées de l'IA</strong><small>${esc(resumeAbonnement() || "Trois plats imaginés avec ce qu'il y a à la maison")}</small></span>
       </button>` : ''}
     ${realisables.length ? `
       <section class="groupe">
@@ -228,12 +235,15 @@ function ouvrir(r, { provisoire = false } = {}) {
 let derniereEnvie = '';
 
 function ideesIA() {
+  // Essai terminé sans abonnement : on montre directement les formules.
+  if (etatConnu()?.statut === 'fin') return ouvrirAbonnement({ apres: maj });
   let idees = [];
   const f = feuille({
     titre: "Idées de l'IA",
     corps: `
       <div data-zone="demande">
         <p class="intro">L'IA regarde ce qu'il y a dans le stock (le frigo d'abord) et propose trois plats. Il faut internet.</p>
+        <p class="ia-statut" data-zone="statut">${esc(resumeAbonnement())}</p>
         <label>Une envie ? (facultatif)<input name="envie" value="${esc(derniereEnvie)}" placeholder="rapide, sans viande, pour des invités…"></label>
         <label>Pour combien de personnes<input name="personnes" inputmode="numeric" value="4"></label>
         <button class="btn" type="submit">✨ Proposer 3 plats</button>
@@ -242,6 +252,7 @@ function ideesIA() {
     actions: {
       voir: (b) => ouvrir(idees[Number(b.dataset.i)], { provisoire: true }),
       autres: (_, api) => api.form.requestSubmit(),
+      abonner: (_, api) => { api.fermer(); ouvrirAbonnement({ apres: maj }); },
     },
     onSubmit: async (fd) => {
       derniereEnvie = String(fd.get('envie') || '').trim();
@@ -263,8 +274,11 @@ function ideesIA() {
         }).join('')}</div>
         <button class="btn btn-secondaire" type="button" data-action="autres">🔄 Autres idées</button>`;
       } catch (err) {
-        zone.innerHTML = `<p class="recette-etat manque">${esc(err.message)}</p>`;
+        zone.innerHTML = `<p class="recette-etat manque">${esc(err.message)}</p>
+          ${err.abonnement ? '<button class="btn" type="button" data-action="abonner">S\'abonner</button>' : ''}`;
       } finally {
+        f.zone.querySelector('[data-zone="statut"]').textContent = resumeAbonnement();
+        maj();
         bouton.disabled = false;
       }
     },

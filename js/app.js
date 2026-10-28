@@ -1,7 +1,8 @@
 // Démarrage : navigation entre les onglets, écran d'accueil, mode hors ligne.
 
-import { abonner, reglages, majReglages } from './store.js';
-import { demarrer as demarrerSync } from './sync.js';
+import { abonner, reglages, majReglages, foyer } from './store.js';
+import { demarrer as demarrerSync, formaterCode } from './sync.js';
+import { feuille } from './ui.js';
 import { esc } from './util.js';
 import * as courses from './vues/courses.js';
 import * as maison from './vues/maison.js';
@@ -62,11 +63,34 @@ function bienvenue() {
   document.body.append(el);
 }
 
+// L'appli a déménagé sur Cloudflare Pages : l'ancienne adresse (GitHub Pages) guide vers la nouvelle.
+// Les données passent par le foyer partagé, car chaque adresse a son propre stockage.
+const NOUVELLE_ADRESSE = 'https://assimeto.pages.dev/';
+function demenagement() {
+  if (location.hostname !== 'alexcruss.github.io') return;
+  const f = foyer();
+  feuille({
+    titre: 'ASSIMETO déménage',
+    corps: `
+      <p class="intro">L'appli a une nouvelle adresse : <strong>assimeto.pages.dev</strong>. Celle-ci ne recevra plus les nouveautés.</p>
+      <ol class="etapes">
+        <li>${f
+          ? `Notez le code de votre foyer : <strong>${esc(formaterCode(f.code))}</strong>.`
+          : "Créez d'abord un foyer dans Réglages : c'est lui qui transporte vos données vers la nouvelle adresse."}</li>
+        <li>Ouvrez la nouvelle adresse dans <strong>Safari</strong>, puis Partager → <strong>Sur l'écran d'accueil</strong>.</li>
+        <li>Dans la nouvelle appli : Réglages → <strong>Rejoindre avec un code</strong>. Liste, stock et recettes reviennent.</li>
+        <li>Ici, Réglages → Quitter le foyer, puis supprimez cette ancienne icône.</li>
+      </ol>
+      <a class="btn" href="${NOUVELLE_ADRESSE}">Ouvrir la nouvelle adresse</a>`,
+  });
+}
+
 window.addEventListener('hashchange', afficher);
 abonner(() => courante?.maj());
 afficher();
 bienvenue();
 demarrerSync();
+demenagement();
 
 // Sur le PC (localhost), pas de cache hors ligne pour voir chaque modification,
 // sauf avec ?sw dans l'adresse pour tester le mode hors ligne.

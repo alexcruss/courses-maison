@@ -692,6 +692,56 @@ input[type="checkbox"] { display: inline-block; width: 22px; height: 22px; margi
 .carte-idee .plat-nom, .carte-idee .plat-meta, .carte-idee .plat-frais { display: block; }
 .pourquoi { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: var(--accent-doux); color: var(--accent); font-weight: 600; }
 .attente-ia { padding: 24px 8px; text-align: center; color: var(--texte-2); }
+.ia-statut { margin: -6px 0 14px; font-size: 14px; font-weight: 650; color: var(--accent); }
+
+/* Abonnement aux idées de l'IA */
+.abo-statut { margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; background: var(--accent-doux); color: var(--accent); font-weight: 650; }
+.abo-attente { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; background: var(--chaud-doux); color: var(--chaud); }
+.abo-attente ul { margin: 4px 0 0; padding-left: 20px; }
+.formules { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.formule { position: relative; margin: 0; }
+.formule input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.formule span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--bordure);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--texte);
+}
+.formule strong { font-size: 18px; }
+.formule small { font-size: 14px; font-weight: 600; color: var(--texte-2); }
+.formule input:checked + span { border-color: var(--accent); background: var(--accent-doux); }
+.formule input:focus-visible + span { outline: 2px solid var(--citron); }
+.formules-moyens strong { font-size: 16px; text-align: center; }
+.abo-consigne { margin: 14px 0; padding: 12px 14px; border-radius: 14px; background: var(--surface); box-shadow: var(--ombre); }
+.abo-consigne p { display: flex; gap: 10px; margin: 0 0 8px; line-height: 1.45; }
+.abo-consigne p:last-child { margin-bottom: 0; }
+.abo-etape {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.abo-numero { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Administration des abonnements (admin.html) */
+.page-admin { padding-bottom: calc(var(--bas) + 40px); }
+.admin-paiement { margin-bottom: 10px; }
+.admin-paiement p { margin: 0 0 6px; }
+.admin-paiement small, .ligne-nom small { font-weight: 600; color: var(--texte-2); }
+.admin-chiffres p { margin: 0 0 6px; }
+.admin-chiffres p:last-child { margin-bottom: 0; }
+.admin-offert { display: flex; align-items: center; gap: 8px; flex: none; margin: 0; color: var(--texte); }
 .sablier { display: inline-block; font-size: 40px; animation: tourne 1.6s ease-in-out infinite; }
 @keyframes tourne { 50% { transform: rotate(-12deg) scale(1.08); } }
 

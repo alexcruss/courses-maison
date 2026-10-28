@@ -5,10 +5,12 @@ import {
   configure, etat as etatSync, abonnerSync, creerFoyer, rejoindreFoyer, quitterFoyer, majMembre,
   formaterCode, messageErreur,
 } from '../sync.js';
+import { iaDisponible, etatAbonnement, etatConnu, resumeAbonnement } from '../ia.js';
+import { ouvrirAbonnement } from '../abonnement.js';
 import { feuille, toast, ICONES } from '../ui.js';
 import { esc } from '../util.js';
 
-export const VERSION = '0.3.1';
+export const VERSION = '0.4.0';
 
 let racine;
 let desabonner = null;
@@ -32,6 +34,7 @@ export function monter(el) {
         </div>
       </section>
       <div data-zone="foyer"></div>
+      <div data-zone="ia"></div>
       <section class="groupe">
         <h2 class="groupe-titre"><span>Installer sur l'iPhone</span></h2>
         <div class="carte carte-pleine">
@@ -56,6 +59,9 @@ export function monter(el) {
     if (e.target.name === 'fichier' && e.target.files[0]) await restaurer(e.target.files[0]);
   });
   desabonner = abonnerSync(() => dessinerFoyer());
+  if (iaDisponible() && foyer() && navigator.onLine) {
+    etatAbonnement().then(() => { if (racine === el) dessinerIA(); }).catch(() => {});
+  }
 }
 
 export function demonter() {
@@ -66,6 +72,7 @@ export function maj() {
   const n = compter();
   racine.querySelector('[data-zone="compte"]').textContent = `${n.liste} article(s) sur la liste · ${n.stock} dans le stock · ${n.recettes} recette(s) perso ou modifiée(s)`;
   dessinerFoyer();
+  dessinerIA();
   const f = foyer();
   racine.querySelector('[data-zone="sauvegarde"]').innerHTML = `
     <section class="groupe">
@@ -125,10 +132,29 @@ function dessinerFoyer() {
   </div></section>`;
 }
 
+// Accès aux idées de l'IA : essai, abonnement, paiement en attente.
+function dessinerIA() {
+  const zone = racine.querySelector('[data-zone="ia"]');
+  if (!zone) return;
+  if (!iaDisponible() || !foyer()) {
+    zone.innerHTML = '';
+    return;
+  }
+  const e = etatConnu();
+  zone.innerHTML = `<section class="groupe">
+    <h2 class="groupe-titre"><span>Idées de l'IA</span></h2>
+    <div class="carte carte-pleine">
+      <p class="intro">${esc(resumeAbonnement(e) || 'Connectez-vous à internet pour voir votre accès.')}</p>
+      ${e && e.statut !== 'offert' ? `<button class="btn" data-action="abonner">${e.statut === 'abonne' ? "Prolonger l'abonnement" : "S'abonner : 300 F / 6 mois ou 500 F / an"}</button>` : ''}
+    </div>
+  </section>`;
+}
+
 async function clic(e) {
   const b = e.target.closest('[data-action]');
   if (!b) return;
   const action = b.dataset.action;
+  if (action === 'abonner') ouvrirAbonnement({ apres: dessinerIA });
   if (action === 'retour') {
     if (history.length > 1) history.back();
     else location.hash = '#courses';
