@@ -81,7 +81,7 @@ function detailFoyer(f) {
   if (f.statut === 'abonne') morceaux.push(`jusqu'au ${date(f.jusqua)}`);
   if (f.statut === 'essai') morceaux.push(`${f.essaisRestants} essai(s) restant(s)`);
   if (f.mois === tableau.mois && f.demandes_mois) morceaux.push(`${f.demandes_mois} demande(s) ce mois`);
-  morceaux.push(`vu ${ilYa(f.vu_le)}`);
+  if (f.vu_le) morceaux.push(`vu ${ilYa(f.vu_le)}`);
   return morceaux.join(' · ');
 }
 
@@ -92,7 +92,7 @@ const cartePaiement = (p) => `
     <p class="foyer-nom">${esc(p.nom || 'Foyer sans nom')} <small>${esc(code(p.code))}</small></p>
     <p><strong>${esc(libellePaiement(p))}</strong></p>
     <p>Depuis le <strong>${esc(numero(p.telephone))}</strong> · réf. <strong>${esc(p.reference)}</strong></p>
-    <p class="aide">Déclaré le ${date(p.cree_le)}. Vérifiez le SMS reçu avant de valider.</p>
+    <p class="aide">Déclaré le ${date(p.cree_le)}. Vérifiez le SMS reçu avant de valider (deux appuis).</p>
     <div class="champs-2">
       <button class="btn" type="button" data-action="valider" data-id="${p.id}">Valider</button>
       <button class="btn btn-secondaire" type="button" data-action="refuser" data-id="${p.id}">Refuser</button>
@@ -154,6 +154,20 @@ zone.addEventListener('submit', (e) => {
   charger();
 });
 
+// Valider ou refuser demande un second appui : certains navigateurs n'affichent pas confirm().
+function confirme(b, libelle) {
+  if (b.dataset.confirme) return true;
+  const avant = b.textContent;
+  b.dataset.confirme = '1';
+  b.textContent = libelle;
+  setTimeout(() => {
+    if (!b.isConnected) return;
+    delete b.dataset.confirme;
+    b.textContent = avant;
+  }, 5000);
+  return false;
+}
+
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-action]');
   if (!b) return;
@@ -161,13 +175,8 @@ document.addEventListener('click', (e) => {
   const p = tableau?.attente.find((x) => x.id === id);
   if (b.dataset.action === 'actualiser') charger();
   if (b.dataset.action === 'oublier') demanderCle();
-  if (b.dataset.action === 'valider' && p
-    && confirm(`Valider ${libellePaiement(p)} pour « ${p.nom} » ?\nRéférence ${p.reference}, depuis le ${numero(p.telephone)}.`)) {
-    agir('valider', { id }, 'Abonnement activé');
-  }
-  if (b.dataset.action === 'refuser' && p && confirm(`Refuser ce paiement de ${fcfa(p.montant)} ?`)) {
-    agir('refuser', { id }, 'Paiement refusé');
-  }
+  if (b.dataset.action === 'valider' && p && confirme(b, 'Confirmer ?')) agir('valider', { id }, 'Abonnement activé');
+  if (b.dataset.action === 'refuser' && p && confirme(b, 'Confirmer le refus ?')) agir('refuser', { id }, 'Paiement refusé');
 });
 
 zone.addEventListener('change', (e) => {
