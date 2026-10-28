@@ -11,6 +11,8 @@ Appli web installable (PWA) pour les courses de la maison, pensée pour un iPhon
 
 Tout fonctionne sans internet. Écrite en HTML, CSS et JavaScript, sans framework ni étape de compilation.
 
+Une appli éditée par **FATALITY 2KP** (Lomé).
+
 ## Installer sur l'iPhone
 
 1. Ouvrir **https://alexcruss.github.io/courses-maison/** dans **Safari** (pas Chrome : iOS 16 n'installe les applis web que depuis Safari).

@@ -8,7 +8,7 @@ import {
 import { feuille, toast, ICONES } from '../ui.js';
 import { esc } from '../util.js';
 
-export const VERSION = '0.3.0';
+export const VERSION = '0.3.1';
 
 let racine;
 let desabonner = null;
@@ -44,7 +44,7 @@ export function monter(el) {
         </div>
       </section>
       <div data-zone="sauvegarde"></div>
-      <p class="pied">ASSIMETO ${VERSION}</p>
+      <p class="pied">ASSIMETO ${VERSION}<br>Une appli FATALITY 2KP · Lomé</p>
     </div>`;
   el.addEventListener('click', clic);
   el.addEventListener('change', async (e) => {
