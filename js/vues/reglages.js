@@ -8,7 +8,7 @@ import {
 import { feuille, toast, ICONES } from '../ui.js';
 import { esc } from '../util.js';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 
 let racine;
 let desabonner = null;

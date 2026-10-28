@@ -2,7 +2,7 @@
 // VERSION change à chaque publication (tools/publier.ps1) : les téléphones
 // téléchargent alors la nouvelle version à la prochaine ouverture.
 
-const VERSION = 'assimeto-20261028-2';
+const VERSION = 'assimeto-20261028-3';
 
 // Le SDK Firebase (foyer partagé) est gardé à part : il ne change pas à chaque
 // version de l'appli et doit rester disponible hors ligne.
@@ -21,6 +21,8 @@ const FICHIERS = [
   './js/ui.js',
   './js/sync.js',
   './js/firebase-config.js',
+  './js/ia.js',
+  './js/ia-config.js',
   './js/data/referentiel.js',
   './js/data/aliments.js',
   './js/data/recettes.js',

@@ -7,6 +7,7 @@ Appli web installable (PWA) pour les courses de la maison, pensée pour un iPhon
 - **Plats** : plats togolais réalisables avec le stock, ou auxquels il manque 1 ou 2 ingrédients ; recettes perso.
 - **Conserver** : frigo ou pas frigo, durée et bon geste pour une centaine d'aliments.
 - **Foyer partagé** : plusieurs téléphones partagent la liste, le stock, les recettes et les prix (Firebase).
+- **Idées IA** : trois plats imaginés par Claude avec ce qu'il y a à la maison (membres d'un foyer).
 
 Tout fonctionne sans internet. Écrite en HTML, CSS et JavaScript, sans framework ni étape de compilation.
 
@@ -61,6 +62,6 @@ powershell -ExecutionPolicy Bypass -File tools\icones.ps1
 
 Chaque enregistrement du foyer (liste, stock, recettes, aliments modifiés) porte `id`, `majLe`, `majPar` et `supprime` : c'est ce qui permettra la synchronisation Firebase de la phase 2.
 
-## Suite prévue
+## Idées IA
 
-- **Phase 3** : bouton « Idées IA » (relais Cloudflare vers l'API Claude).
+Le relais Cloudflare qui garde la clé de l'API Claude est décrit dans [cloudflare/README.md](cloudflare/README.md). Sans adresse de relais dans `js/ia-config.js`, le bouton n'apparaît pas.

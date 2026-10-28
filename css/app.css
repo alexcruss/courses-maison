@@ -660,6 +660,41 @@ input[type="checkbox"] { display: inline-block; width: 22px; height: 22px; margi
 .point.ok { background: var(--accent-doux); color: var(--accent); }
 .point.manque { background: var(--rouge-doux); color: var(--rouge); }
 
+/* Idées de l'IA */
+.carte-ia {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin: -10px 0 24px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: var(--rayon);
+  background: var(--degrade-vert);
+  color: #fff;
+  text-align: left;
+  box-shadow: 0 8px 22px rgba(47, 97, 25, 0.28);
+}
+.carte-ia strong { display: block; font-size: 17px; }
+.carte-ia small { display: block; font-size: 14px; opacity: 0.9; }
+.carte-ia-icone {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 22px;
+}
+.carte-idee { width: 100%; border: 0; text-align: left; }
+.carte-idee > span:not(.assiette) { flex: 1; min-width: 0; }
+.carte-idee .plat-nom, .carte-idee .plat-meta, .carte-idee .plat-frais { display: block; }
+.pourquoi { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: var(--accent-doux); color: var(--accent); font-weight: 600; }
+.attente-ia { padding: 24px 8px; text-align: center; color: var(--texte-2); }
+.sablier { display: inline-block; font-size: 40px; animation: tourne 1.6s ease-in-out infinite; }
+@keyframes tourne { 50% { transform: rotate(-12deg) scale(1.08); } }
+
 /* Fiche recette */
 .feuille-recette .feuille-tete { position: absolute; right: 16px; top: 0; z-index: 2; padding: 12px 0; background: none; }
 .feuille-recette .feuille-tete h2 { display: none; }

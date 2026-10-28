@@ -59,6 +59,12 @@ async function connecter() {
   return auth.currentUser.uid;
 }
 
+// Jeton de connexion, que le relais des idées IA fait vérifier par Firestore.
+export async function jetonFirebase() {
+  await connecter();
+  return fb.auth.currentUser.getIdToken();
+}
+
 export const messageErreur = (err) => {
   if (err?.code === 'unavailable' || /offline/i.test(err?.message || '')) return 'Pas de connexion internet.';
   if (err?.code === 'permission-denied') return "Accès refusé : ce téléphone ne fait plus partie du foyer.";

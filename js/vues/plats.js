@@ -7,6 +7,7 @@ import {
   ajouterManquants, marquerEpuises,
 } from '../metier.js';
 import { feuille, toast, champAliment, assiette, options, salutation, ICONES } from '../ui.js';
+import { iaDisponible, demanderIdees, rattacherIngredients, garderRecette } from '../ia.js';
 import { esc, norm, qte, nombre } from '../util.js';
 
 let racine;
@@ -56,6 +57,11 @@ export function maj() {
 
   racine.querySelector('[data-zone="contenu"]').innerHTML = `
     ${vedette(s, realisables, presque)}
+    ${iaDisponible() && !s.stockVide ? `
+      <button class="carte-ia" data-action="ia">
+        <span class="carte-ia-icone" aria-hidden="true">✨</span>
+        <span><strong>Idées de l'IA</strong><small>Trois plats imaginés avec ce qu'il y a à la maison</small></span>
+      </button>` : ''}
     ${realisables.length ? `
       <section class="groupe">
         <h2 class="section-titre">Réalisables maintenant <span class="compte">${realisables.length}</span></h2>
@@ -99,8 +105,11 @@ function vedette(s, realisables, presque) {
   </button>`;
 }
 
-const nomsManquants = (a) => a.manquants.map((i) => aliment(i.id)?.nom).join(', ');
-const meta = (r) => [TYPE[r.type]?.nom.replace(/s$/, ''), r.duree ? `${r.duree} min` : '', r.source !== 'base' ? 'ma recette' : '']
+// Un ingrédient proposé par l'IA peut ne pas encore exister dans le catalogue : on affiche son nom.
+const nomIngredient = (i) => aliment(i.id)?.nom || i.nom || i.id;
+const nomsManquants = (a) => a.manquants.map(nomIngredient).join(', ');
+const SOURCES = { base: '', 'base-modifiee': 'modifiée', perso: 'ma recette', ia: 'idée IA' };
+const meta = (r) => [TYPE[r.type]?.nom.replace(/s$/, ''), r.duree ? `${r.duree} min` : '', SOURCES[r.source] ?? 'ma recette']
   .filter(Boolean).join(' · ');
 
 const carte = (a) => `
@@ -136,8 +145,9 @@ function clic(e) {
   if (!b) return;
   const { id, action } = b.dataset;
   if (action === 'type') { type = id; maj(); }
-  if (action === 'ouvrir') ouvrir(id);
+  if (action === 'ouvrir') ouvrir(recette(id));
   if (action === 'nouvelle') editer(null);
+  if (action === 'ia') ideesIA();
   if (action === 'manquants') {
     const n = ajouterManquants(analyser(recette(id)));
     toast(`${n} ingrédient${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à la liste`);
@@ -146,8 +156,8 @@ function clic(e) {
 
 // ——— Fiche recette ———
 
-function ouvrir(id) {
-  const r = recette(id);
+// provisoire : idée de l'IA pas encore gardée (ni modifiable, ni supprimable).
+function ouvrir(r, { provisoire = false } = {}) {
   if (!r) return;
   const stock = analyseStock();
   const a = analyser(r, stock);
@@ -157,7 +167,7 @@ function ouvrir(id) {
     const etat = ok ? 'ok' : i.opt ? 'opt' : 'manque';
     return `<li class="${etat}">
       <span class="ing-etat">${ok ? '✓' : i.opt ? '○' : '✗'}</span>
-      <span class="ing-nom">${esc(aliment(i.id)?.nom || i.id)}${alts.length ? ` <small>ou ${esc(alts.join(', '))}</small>` : ''}${i.opt ? ' <small>(facultatif)</small>' : ''}</span>
+      <span class="ing-nom">${esc(nomIngredient(i))}${alts.length ? ` <small>ou ${esc(alts.join(', '))}</small>` : ''}${i.opt ? ' <small>(facultatif)</small>' : ''}</span>
       <span class="ing-q">${esc(i.q || '')}</span>
     </li>`;
   }).join('');
@@ -174,6 +184,7 @@ function ouvrir(id) {
         ${r.portions ? `<span>👥 ${r.portions} pers.</span>` : ''}
       </div>
       ${r.accompagnement ? `<p class="servi-avec"><span class="servi">Servi avec</span> ${esc(r.accompagnement)}</p>` : ''}
+      ${r.pourquoi ? `<p class="pourquoi">✨ ${esc(r.pourquoi)}</p>` : ''}
       <p class="recette-etat ${a.ok ? 'ok' : 'manque'}">${a.ok
         ? '✓ Tout est à la maison'
         : `Il manque ${a.manquants.length} ingrédient${a.manquants.length > 1 ? 's' : ''} : ${esc(nomsManquants(a))}`}</p>
@@ -182,12 +193,21 @@ function ouvrir(id) {
       ${r.etapes?.length ? `<h3>Préparation</h3><ol class="etapes">${r.etapes.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
       <div class="actions-recette">
         ${a.ok ? '' : `<button class="btn" type="button" data-action="manquants">🛒 Ajouter ${a.manquants.length > 1 ? `les ${a.manquants.length} manquants` : 'le manquant'} à la liste</button>`}
+        ${provisoire ? `
+        <button class="btn ${a.ok ? '' : 'btn-secondaire'}" type="button" data-action="garder">⭐ Garder cette recette</button>` : `
         <button class="btn ${a.ok ? '' : 'btn-secondaire'}" type="button" data-action="cuisine">🍲 J'ai cuisiné ce plat</button>
         <button class="btn btn-secondaire" type="button" data-action="modifier">Modifier la recette</button>
-        <button class="btn btn-danger" type="button" data-action="supprimer">${estRecetteDeBase(r.id) ? 'Masquer cette recette' : 'Supprimer cette recette'}</button>
+        <button class="btn btn-danger" type="button" data-action="supprimer">${estRecetteDeBase(r.id) ? 'Masquer cette recette' : 'Supprimer cette recette'}</button>`}
       </div>`,
     actions: {
+      garder: (_, f) => {
+        garderRecette(r);
+        toast('Recette gardée dans Toutes les recettes');
+        f.fermer();
+      },
       manquants: (_, f) => {
+        // Les ingrédients inconnus du catalogue y sont ajoutés pour pouvoir aller sur la liste.
+        rattacherIngredients(r);
         const n = ajouterManquants(a);
         toast(`${n} ingrédient${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à la liste`);
         f.fermer();
@@ -199,6 +219,54 @@ function ouvrir(id) {
         ecrire('recettes', { ...r, masquee: true });
         f.fermer();
       },
+    },
+  });
+}
+
+// ——— Idées de l'IA ———
+
+let derniereEnvie = '';
+
+function ideesIA() {
+  let idees = [];
+  const f = feuille({
+    titre: "Idées de l'IA",
+    corps: `
+      <div data-zone="demande">
+        <p class="intro">L'IA regarde ce qu'il y a dans le stock (le frigo d'abord) et propose trois plats. Il faut internet.</p>
+        <label>Une envie ? (facultatif)<input name="envie" value="${esc(derniereEnvie)}" placeholder="rapide, sans viande, pour des invités…"></label>
+        <label>Pour combien de personnes<input name="personnes" inputmode="numeric" value="4"></label>
+        <button class="btn" type="submit">✨ Proposer 3 plats</button>
+      </div>
+      <div data-zone="resultats"></div>`,
+    actions: {
+      voir: (b) => ouvrir(idees[Number(b.dataset.i)], { provisoire: true }),
+      autres: (_, api) => api.form.requestSubmit(),
+    },
+    onSubmit: async (fd) => {
+      derniereEnvie = String(fd.get('envie') || '').trim();
+      const zone = f.zone.querySelector('[data-zone="resultats"]');
+      const bouton = f.form.querySelector('button[type="submit"]');
+      bouton.disabled = true;
+      zone.innerHTML = '<div class="attente-ia"><span class="sablier" aria-hidden="true">🍲</span><p>L\'IA cherche des idées… (une vingtaine de secondes)</p></div>';
+      try {
+        idees = await demanderIdees({ envie: derniereEnvie, personnes: nombre(fd.get('personnes')) || 4 });
+        const stock = analyseStock();
+        zone.innerHTML = `<div class="liste-cartes">${idees.map((r, i) => {
+          const a = analyser(r, stock);
+          return `<button type="button" class="carte-presque carte-idee" data-action="voir" data-i="${i}">
+            ${assiette(r, 'petite')}
+            <span><span class="plat-nom">${esc(r.nom)}</span>
+              <span class="plat-meta">${esc(meta(r))}</span>
+              <span class="${a.ok ? 'plat-frais' : 'plat-manque'}">${a.ok ? '✓ Tout est à la maison' : `Manque : ${esc(nomsManquants(a))}`}</span></span>
+          </button>`;
+        }).join('')}</div>
+        <button class="btn btn-secondaire" type="button" data-action="autres">🔄 Autres idées</button>`;
+      } catch (err) {
+        zone.innerHTML = `<p class="recette-etat manque">${esc(err.message)}</p>`;
+      } finally {
+        bouton.disabled = false;
+      }
     },
   });
 }
