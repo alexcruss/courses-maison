@@ -741,6 +741,11 @@ input[type="checkbox"] { display: inline-block; width: 22px; height: 22px; margi
 .admin-paiement small, .ligne-nom small { font-weight: 600; color: var(--texte-2); }
 .admin-chiffres p { margin: 0 0 6px; }
 .admin-chiffres p:last-child { margin-bottom: 0; }
+.admin-direct { display: flex; align-items: baseline; gap: 8px; }
+.admin-direct strong { font-size: 32px; line-height: 1; color: var(--accent); }
+.admin-periodes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.admin-chiffres .admin-periodes p { margin: 0; font-size: 13px; color: var(--texte-2); }
+.admin-periodes strong { display: block; font-size: 20px; color: var(--texte); }
 .admin-offert { display: flex; align-items: center; gap: 8px; flex: none; margin: 0; color: var(--texte); }
 .sablier { display: inline-block; font-size: 40px; animation: tourne 1.6s ease-in-out infinite; }
 @keyframes tourne { 50% { transform: rotate(-12deg) scale(1.08); } }

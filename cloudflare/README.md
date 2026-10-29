@@ -19,7 +19,8 @@ Coût mesuré le 2026-10-28 : environ 1,2 F par demande avec Haiku, 29 F avec Op
 | `POST /idees` (ou `/`) | Trois idées de plats |
 | `POST /etat` | Accès du foyer, formules, numéros de paiement, paiements en attente |
 | `POST /paiement` | Le client déclare un paiement Flooz ou T-Money (formule, numéro, référence du SMS) |
-| `POST /admin` | Tableau, validation, refus, accès offert ; en-tête `X-Cle-Admin` |
+| `POST /presence` | Signe de vie de l'appli ouverte (identifiant tiré au hasard), chaque minute ; table `presences` gardée 90 jours |
+| `POST /admin` | Tableau, fréquentation, validation, refus, accès offert ; en-tête `X-Cle-Admin` |
 
 ## Déployer (sans rien installer)
 

@@ -85,6 +85,15 @@ function detailFoyer(f) {
   return morceaux.join(' · ');
 }
 
+// Comptés par téléphone ayant ouvert l'appli avec internet (signe de vie chaque minute).
+const blocFrequentation = (f) => `
+  <p class="admin-direct"><strong>${f.enCeMoment}</strong> personne${f.enCeMoment > 1 ? 's' : ''} en ce moment</p>
+  <div class="admin-periodes">
+    <p><strong>${f.aujourdhui}</strong> aujourd'hui</p>
+    <p><strong>${f.semaine}</strong> sur 7 jours</p>
+    <p><strong>${f.trenteJours}</strong> sur 30 jours</p>
+  </div>`;
+
 const libellePaiement = (p) => `${fcfa(p.montant)} · ${tableau.formules[p.formule]?.nom || p.formule} · ${tableau.moyens[p.moyen] || p.moyen}`;
 
 const cartePaiement = (p) => `
@@ -124,6 +133,11 @@ function dessiner() {
       <h2 class="groupe-titre"><span>À vérifier</span><span>${t.attente.length}</span></h2>
       ${t.attente.length ? t.attente.map(cartePaiement).join('') : '<p class="aide">Aucun paiement en attente.</p>'}
     </section>
+    ${t.frequentation ? `<section class="groupe">
+      <h2 class="groupe-titre"><span>Fréquentation</span></h2>
+      <div class="carte carte-pleine admin-chiffres" data-zone="frequentation">${blocFrequentation(t.frequentation)}</div>
+      <p class="aide">Un téléphone compte une fois par jour, et « en ce moment » pendant 2 minutes après sa dernière ouverture. Safari et l'icône de l'écran d'accueil comptent à part.</p>
+    </section>` : ''}
     <section class="groupe">
       <h2 class="groupe-titre"><span>Ce mois-ci</span></h2>
       <div class="carte carte-pleine admin-chiffres">
@@ -178,6 +192,19 @@ document.addEventListener('click', (e) => {
   if (b.dataset.action === 'valider' && p && confirme(b, 'Confirmer ?')) agir('valider', { id }, 'Abonnement activé');
   if (b.dataset.action === 'refuser' && p && confirme(b, 'Confirmer le refus ?')) agir('refuser', { id }, 'Paiement refusé');
 });
+
+// « En ce moment » se met à jour chaque minute tant que la page est affichée.
+setInterval(async () => {
+  if (!tableau?.frequentation || document.visibilityState !== 'visible') return;
+  try {
+    const { frequentation } = await appeler('frequentation');
+    tableau.frequentation = frequentation;
+    const z = zone.querySelector('[data-zone="frequentation"]');
+    if (z) z.innerHTML = blocFrequentation(frequentation);
+  } catch {
+    // la minute suivante réessaiera
+  }
+}, 60000);
 
 zone.addEventListener('change', (e) => {
   const foyerId = e.target.dataset.foyer;

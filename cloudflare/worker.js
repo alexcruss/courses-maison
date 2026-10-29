@@ -6,6 +6,8 @@
 // - Abonnements (base D1 liée sous le nom DB) : 3 idées offertes par foyer, puis 300 F les 6 mois
 //   ou 500 F l'année, payés par Flooz ou T-Money et validés à la main dans admin.html (secret ADMIN_CLE).
 // - Le téléphone n'envoie que des listes d'aliments ; la consigne donnée à Claude est fixée ici.
+// - Fréquentation : l'appli ouverte envoie chaque minute un signe de vie (/presence) avec un
+//   identifiant tiré au hasard sur le téléphone ; admin.html en tire les personnes en ce moment.
 //
 // À coller dans le tableau de bord Cloudflare (Workers > assimeto-ia > Modifier le code).
 
@@ -116,6 +118,12 @@ const TABLES = [
     cache_lu INTEGER,
     cache_ecrit INTEGER
   )`,
+  `CREATE TABLE IF NOT EXISTS presences (
+    jour TEXT NOT NULL,
+    appareil TEXT NOT NULL,
+    vu_le TEXT NOT NULL,
+    PRIMARY KEY (jour, appareil)
+  )`,
 ];
 
 class Erreur extends Error {
@@ -143,6 +151,7 @@ export default {
       const demande = await requete.json().catch(() => { throw new Erreur('Demande illisible.', 400); });
       await preparerBase(env.DB);
       if (chemin === '/admin') return repondre(await admin(env, requete, demande), 200, cors);
+      if (chemin === '/presence') return repondre(await presence(env.DB, demande), 200, cors);
 
       const jeton = (requete.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
       const fiche = await ficheFoyer(env.DB, await verifierMembre(jeton, demande.foyerId));
@@ -264,6 +273,35 @@ async function declarerPaiement(env, fiche, d) {
   return etat(env, fiche);
 }
 
+// ——— Fréquentation ———
+
+const ENCORE_LA = 2 * 60000; // un téléphone compte « en ce moment » pendant 2 minutes après son signe de vie
+const GARDER_JOURS = 90;
+
+// Une ligne par téléphone et par jour : sans nom, ni numéro, ni foyer.
+async function presence(db, d) {
+  const appareil = String(d.appareil ?? '');
+  if (!/^[A-Za-z0-9-]{16,40}$/.test(appareil)) throw new Erreur('Appareil inconnu.', 400);
+  const maintenant = new Date().toISOString();
+  await db.prepare(`INSERT INTO presences (jour, appareil, vu_le) VALUES (?1, ?2, ?3)
+    ON CONFLICT (jour, appareil) DO UPDATE SET vu_le = ?3`).bind(maintenant.slice(0, 10), appareil, maintenant).run();
+  return { ok: true };
+}
+
+const jourIlYa = (jours) => new Date(Date.now() - jours * 86400000).toISOString().slice(0, 10);
+
+async function frequentation(db) {
+  const [direct, periodes] = await db.batch([
+    db.prepare('SELECT COUNT(DISTINCT appareil) AS n FROM presences WHERE jour >= ?1 AND vu_le > ?2')
+      .bind(jourIlYa(1), new Date(Date.now() - ENCORE_LA).toISOString()),
+    db.prepare(`SELECT COUNT(DISTINCT CASE WHEN jour = ?1 THEN appareil END) AS aujourdhui,
+        COUNT(DISTINCT CASE WHEN jour >= ?2 THEN appareil END) AS semaine,
+        COUNT(DISTINCT appareil) AS trenteJours
+      FROM presences WHERE jour >= ?3`).bind(jourIlYa(0), jourIlYa(6), jourIlYa(29)),
+  ]);
+  return { enCeMoment: direct.results[0].n, ...periodes.results[0] };
+}
+
 // ——— Administration (admin.html) ———
 
 async function verifierAdmin(env, requete) {
@@ -277,6 +315,8 @@ async function verifierAdmin(env, requete) {
 async function admin(env, requete, d) {
   await verifierAdmin(env, requete);
   const db = env.DB;
+  // admin.html redemande la fréquentation chaque minute, sans recharger tout le tableau.
+  if (d.action === 'frequentation') return { frequentation: await frequentation(db) };
   if (d.action === 'valider') await valider(db, Number(d.id));
   else if (d.action === 'refuser') {
     await db.prepare(`UPDATE paiements SET statut = 'refuse', traite_le = ?2 WHERE id = ?1 AND statut = 'attente'`)
@@ -315,8 +355,10 @@ async function tableau(db) {
     db.prepare(`SELECT COALESCE(SUM(montant), 0) AS total,
         COALESCE(SUM(CASE WHEN substr(traite_le, 1, 7) = ?1 THEN montant END), 0) AS mois
       FROM paiements WHERE statut = 'valide'`).bind(mois),
+    db.prepare('DELETE FROM presences WHERE jour < ?1').bind(jourIlYa(GARDER_JOURS)),
   ]);
   return {
+    frequentation: await frequentation(db),
     mois,
     attente: attente.results,
     traites: traites.results,

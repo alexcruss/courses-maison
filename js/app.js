@@ -2,6 +2,7 @@
 
 import { abonner, reglages, majReglages, foyer } from './store.js';
 import { demarrer as demarrerSync, formaterCode } from './sync.js';
+import { demarrer as demarrerPresence } from './presence.js';
 import { feuille } from './ui.js';
 import { esc } from './util.js';
 import * as courses from './vues/courses.js';
@@ -93,8 +94,10 @@ demarrerSync();
 demenagement();
 
 // Sur le PC (localhost), pas de cache hors ligne pour voir chaque modification,
-// sauf avec ?sw dans l'adresse pour tester le mode hors ligne.
-const dev = ['localhost', '127.0.0.1'].includes(location.hostname) && !location.search.includes('sw');
+// sauf avec ?sw dans l'adresse pour tester le mode hors ligne. Les essais sur le PC ne sont pas comptés.
+const surLePC = ['localhost', '127.0.0.1'].includes(location.hostname);
+const dev = surLePC && !location.search.includes('sw');
+if (!surLePC) demarrerPresence();
 if ('serviceWorker' in navigator) {
   if (dev) {
     navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));
