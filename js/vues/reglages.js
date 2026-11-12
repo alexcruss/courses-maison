@@ -47,7 +47,8 @@ export function monter(el) {
         </div>
       </section>
       <div data-zone="sauvegarde"></div>
-      <p class="pied">ASSIMETO ${VERSION}<br>Une appli FATALITY 2KP · Lomé</p>
+      <p class="pied">ASSIMETO ${VERSION}<br>Une appli DEKOPI GOLD · Lomé<br>
+        <a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité, conditions et mentions légales</a></p>
     </div>`;
   el.addEventListener('click', clic);
   el.addEventListener('change', async (e) => {
@@ -79,7 +80,7 @@ export function maj() {
       <h2 class="groupe-titre"><span>Sauvegarde</span></h2>
       <div class="carte carte-pleine">
         <p class="aide">${f
-          ? 'Le foyer garde aussi toutes les données. Une sauvegarde dans un fichier reste une sécurité de plus.'
+          ? 'Le foyer garde aussi toutes les données, en ligne (Google Firebase). Quitter le foyer ne les supprime pas : pour faire effacer le foyer, écrivez-nous (voir « Confidentialité » en bas de page). Une sauvegarde dans un fichier reste une sécurité de plus.'
           : 'Les données ne sont que sur ce téléphone. Faites une sauvegarde de temps en temps (WhatsApp à vous-même, Fichiers, e-mail).'}</p>
         <button class="btn" data-action="exporter">Exporter une sauvegarde</button>
         <label class="btn btn-secondaire btn-fichier">Restaurer une sauvegarde
@@ -145,6 +146,7 @@ function dessinerIA() {
     <h2 class="groupe-titre"><span>Idées de l'IA</span></h2>
     <div class="carte carte-pleine">
       <p class="intro">${esc(resumeAbonnement(e) || 'Connectez-vous à internet pour voir votre accès.')}</p>
+      <p class="aide">Pour proposer des plats, l'appli envoie à Claude (Anthropic) la liste des aliments en stock et votre « envie », jamais vos noms ni numéros. <a href="confidentialite.html#ia" target="_blank" rel="noopener">En savoir plus</a></p>
       ${e && e.statut !== 'offert' ? `<button class="btn" data-action="abonner">${e.statut === 'abonne' ? "Prolonger l'abonnement" : "S'abonner : 300 F / 6 mois ou 500 F / an"}</button>` : ''}
     </div>
   </section>`;

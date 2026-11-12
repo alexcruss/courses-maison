@@ -242,7 +242,7 @@ function ideesIA() {
     titre: "Idées de l'IA",
     corps: `
       <div data-zone="demande">
-        <p class="intro">L'IA regarde ce qu'il y a dans le stock (le frigo d'abord) et propose trois plats. Il faut internet.</p>
+        <p class="intro">L'IA regarde ce qu'il y a dans le stock (le frigo d'abord) et propose trois plats. Il faut internet. En touchant le bouton, vous acceptez d'envoyer la liste du stock et votre envie à Claude (Anthropic) : n'y écrivez rien de personnel. <a href="confidentialite.html#ia" target="_blank" rel="noopener">Détails</a></p>
         <p class="ia-statut" data-zone="statut">${esc(resumeAbonnement())}</p>
         <label>Une envie ? (facultatif)<input name="envie" value="${esc(derniereEnvie)}" placeholder="rapide, sans viande, pour des invités…"></label>
         <label>Pour combien de personnes<input name="personnes" inputmode="numeric" value="4"></label>

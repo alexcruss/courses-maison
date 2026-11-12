@@ -73,6 +73,7 @@ function dessiner(f, e) {
       <label>Numéro qui a payé<input name="telephone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="90 12 34 56"></label>
       <label>Référence du SMS de paiement<input name="reference" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ex. 2410281234"></label>
       <div data-zone="erreur"></div>
+      <p class="aide">Paiement unique, sans renouvellement automatique, à faire par une personne majeure avec son propre compte. Si votre paiement n'est pas retrouvé, vous êtes remboursé. <a href="confidentialite.html#abonnement" target="_blank" rel="noopener">Conditions complètes</a></p>
       <button class="btn" type="submit">J'ai payé</button>`
     : '<p class="recette-etat manque">Le paiement par Flooz ou T-Money n\'est pas encore ouvert. Revenez bientôt.</p>'}`;
   consigne(f, e);

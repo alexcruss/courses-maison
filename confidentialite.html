@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ASSIMETO · Confidentialité, conditions et mentions légales</title>
+  <meta name="description" content="Données utilisées par ASSIMETO, conditions de l'abonnement aux idées de l'IA, remboursement et mentions légales.">
+  <meta name="theme-color" content="#3f7d23">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <style>
+    :root { color-scheme: light dark; --fond:#faf6f0; --texte:#2b1d16; --doux:#5f5048; --vert:#2f6a18; --filet:#e6dccf; --tbc:#8a3b12; }
+    @media (prefers-color-scheme: dark) { :root { --fond:#1d1612; --texte:#f5eee6; --doux:#c4b6aa; --vert:#8fd16b; --filet:#3a2d25; --tbc:#f0a37a; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.7 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: var(--fond); color: var(--texte); }
+    main { max-width: 720px; margin: 0 auto; padding: max(24px, env(safe-area-inset-top)) 20px 64px; }
+    a { color: var(--vert); text-underline-offset: 3px; }
+    :focus-visible { outline: 3px solid var(--vert); outline-offset: 3px; border-radius: 4px; }
+    h1 { font-size: 1.8rem; line-height: 1.2; margin: 16px 0 8px; }
+    h2 { font-size: 1.3rem; margin: 40px 0 8px; scroll-margin-top: 12px; }
+    h3 { font-size: 1rem; margin: 20px 0 4px; }
+    p, li { color: var(--doux); margin: 0 0 10px; }
+    ul { padding-left: 22px; }
+    .retour, .sommaire a { display: inline-flex; align-items: center; min-height: 44px; }
+    .sommaire { display: flex; flex-wrap: wrap; gap: 0 18px; }
+    .tbc { display: inline-block; font-size: .75rem; font-weight: 600; color: var(--tbc); border: 1px dashed currentColor; border-radius: 6px; padding: 0 8px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="retour" href="./">← Retour à l'appli</a>
+  <h1>Confidentialité, conditions et mentions légales</h1>
+  <p>Dernière mise à jour : novembre 2026. Les mentions « <span class="tbc">à compléter</span> » seront renseignées par l'éditeur.</p>
+  <nav class="sommaire" aria-label="Sommaire">
+    <a href="#donnees">Vos données</a>
+    <a href="#ia">Idées de l'IA</a>
+    <a href="#abonnement">Abonnement</a>
+    <a href="#mentions">Mentions légales</a>
+  </nav>
+
+  <h2 id="donnees">Vos données</h2>
+  <h3>Sur votre téléphone</h3>
+  <p>La liste de courses, le stock, vos recettes et vos prix sont enregistrés d'abord sur votre téléphone. Sans foyer partagé, rien ne quitte votre appareil. Le bouton « Tout effacer » (Réglages) les supprime.</p>
+  <h3>Si vous créez ou rejoignez un foyer</h3>
+  <p>Votre téléphone se connecte à Firebase (Google) de façon anonyme, sans nom, e-mail ni mot de passe. Les données du foyer (liste, stock, recettes, prix, prénoms des membres et code d'invitation) sont alors copiées dans la base Firestore de Google, accessible aux seuls membres du foyer. « Quitter le foyer » arrête la synchronisation de votre téléphone ; les données du foyer restent en ligne tant que le foyer existe. Pour faire supprimer un foyer et ses données, écrivez-nous (voir contact plus bas).</p>
+  <h3>Cookies et traceurs</h3>
+  <p>ASSIMETO n'utilise ni publicité, ni outil de mesure d'audience, ni cookie de suivi. L'appli garde ses données dans le stockage de votre navigateur (localStorage) et un cache pour fonctionner sans internet : ils sont nécessaires au service.</p>
+  <h3>Vos droits</h3>
+  <p>Vous pouvez demander l'accès à vos données, leur correction ou leur suppression en nous écrivant. Vous pouvez aussi saisir l'autorité togolaise de protection des données à caractère personnel (IPDCP).</p>
+  <h3>Mineurs</h3>
+  <p>L'appli ne demande aucune information sur l'âge. Un enfant peut l'utiliser avec sa famille. L'abonnement payant et le paiement par mobile money doivent être faits par une personne majeure, avec son propre compte.</p>
+
+  <h2 id="ia">Idées de l'IA</h2>
+  <p>Quand vous touchez « Proposer 3 plats », l'appli envoie à notre serveur, puis à Claude (Anthropic), les noms des aliments en stock, le catalogue d'aliments, ce que vous avez écrit dans « Une envie ? » et le nombre de personnes. N'y écrivez rien de personnel. Le prénom, le code du foyer et vos numéros de téléphone ne sont pas envoyés à l'IA. Les idées ne sont enregistrées que si vous choisissez de les garder. Les idées sont générées automatiquement : vérifiez la fraîcheur et la cuisson des aliments, et tenez compte de vos allergies.</p>
+  <p>Les conseils de conservation sont indicatifs. En cas de doute sur un aliment, jetez-le.</p>
+
+  <h2 id="abonnement">Abonnement aux idées de l'IA</h2>
+  <p><span class="tbc">Conditions proposées, à valider par l'éditeur</span></p>
+  <ul>
+    <li><strong>Gratuit</strong> : 3 demandes offertes par foyer pour essayer.</li>
+    <li><strong>Prix</strong> : 300 F CFA pour 6 mois ou 500 F CFA pour 1 an, pour tout le foyer, sans autre frais. Il n'y a pas de renouvellement automatique.</li>
+    <li><strong>Paiement</strong> : par Flooz ou T-Money, au numéro affiché dans l'appli, puis déclaration du numéro payeur et de la référence du SMS. Nous vérifions le paiement à la main, en général dans la journée.</li>
+    <li><strong>Données de paiement conservées</strong> : numéro payeur, référence, montant et date, uniquement pour vérifier le paiement et tenir notre comptabilité.</li>
+    <li><strong>Paiement non retrouvé ou refusé</strong> : l'abonnement n'est pas activé et vous êtes remboursé sur demande.</li>
+    <li><strong>Remboursement</strong> : une fois l'abonnement activé, il n'est pas remboursable, sauf si le service reste indisponible plus de 7 jours de suite.</li>
+    <li><strong>Plafond</strong> : le nombre de demandes par mois est indiqué dans l'appli.</li>
+  </ul>
+
+  <h2 id="mentions">Mentions légales</h2>
+  <p><strong>Éditeur</strong> : DEKOPI GOLD, Lomé (Togo). Statut et immatriculation (RCCM / NIF) : <span class="tbc">à compléter</span></p>
+  <p><strong>Fondateur</strong> : Pierre Kossi DEGBOEVI ·<a href="https://pierredegboevi.com/">pierredegboevi.com</a></p>
+  <p><strong>Contact</strong> (questions, remboursement, suppression de données) : <a href="mailto:pierredegboevi@gmail.com">pierredegboevi@gmail.com</a> · WhatsApp <a href="https://wa.me/22891512041">+228 91 51 20 41</a> <span class="tbc">contact dédié ASSIMETO à confirmer</span></p>
+  <p><strong>Hébergement</strong> : Cloudflare, Inc., États-Unis (appli et relais). <strong>Base de données du foyer</strong> : Google Firebase. <strong>Idées de plats</strong> : Anthropic.</p>
+</main>
+</body>
+</html>

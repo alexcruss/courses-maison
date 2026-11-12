@@ -32,7 +32,7 @@ Coût mesuré le 2026-10-28 : environ 1,2 F par demande avec Haiku, 29 F avec Op
    - `ANTHROPIC_API_KEY` (Secret) : la clé Anthropic ;
    - `ADMIN_CLE` (Secret) : une phrase de 16 caractères ou plus, qui ouvre `admin.html` ;
    - `NUMERO_FLOOZ` et `NUMERO_TMONEY` (Text) : les numéros à 8 chiffres qui reçoivent les paiements. Sans eux, l'appli affiche « paiement pas encore ouvert » ;
-   - `BENEFICIAIRE` (Text, facultatif) : le nom affiché à côté du numéro, « FATALITY 2KP » par défaut.
+   - `BENEFICIAIRE` (Text, facultatif) : le nom affiché à côté du numéro, « DEKOPI GOLD » par défaut.
 6. **Appli** : mettre l'adresse du Worker (`https://assimeto-ia.<compte>.workers.dev`) dans `js/ia-config.js`, puis publier.
 
 ## Réglages dans `worker.js`

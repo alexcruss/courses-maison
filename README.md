@@ -11,7 +11,7 @@ Appli web installable (PWA) pour les courses de la maison, pensée pour un iPhon
 
 Tout fonctionne sans internet. Écrite en HTML, CSS et JavaScript, sans framework ni étape de compilation.
 
-Une appli éditée par **FATALITY 2KP** (Lomé).
+Une appli éditée par **DEKOPI GOLD** (Lomé).
 
 ## Installer sur l'iPhone
 

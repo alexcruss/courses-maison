@@ -223,7 +223,7 @@ async function etat(env, fiche) {
     attente: attente.results,
     formules: Object.entries(FORMULES).map(([id, f]) => ({ id, ...f })),
     numeros: { flooz: env.NUMERO_FLOOZ || '', tmoney: env.NUMERO_TMONEY || '' },
-    beneficiaire: env.BENEFICIAIRE || 'FATALITY 2KP',
+    beneficiaire: env.BENEFICIAIRE || 'DEKOPI GOLD',
     essais: ESSAIS,
     plafondMois: PLAFOND_MOIS,
   };
